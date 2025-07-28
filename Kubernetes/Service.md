@@ -448,23 +448,25 @@ my-external-service.default.svc.cluster.local.  5 IN CNAME example.com.
 
 
 
-# Service 字段解释
+# 流量策略
 
 ## spec.internalTrafficPolicy
 
-**internalTrafficPolicy** 字段，用于控制**集群内部流量**的路由策略，主要影响同一集群内 Pod 之间的通信行为，适用于所有 Service 类型，可选值：
+**internalTrafficPolicy** 字段，用于控制**集群内部流量**的路由策略，主要影响同一集群内 Pod 之间的通信行为，适用于所有 Service 类型。
 
-- `Cluster`（默认）：流量会路由到集群中所有健康的端点（跨节点），适用于全局负载均衡。
-- `Local`：流量仅路由到当前节点上的本地端点。若节点无可用端点，则视为该服务无可用实例（即使其他节点有端点），这样的流量会被 Drop。
+可选值：
+
+- `Cluster`（默认）：从集群内任何位置访问 Service 的 ClusterIP 时，流量被负载均衡到集群中所有健康的端点（跨节点），适用于全局负载均衡。
+- `Local`：当一个 Pod 访问 Service 时，流量只会被路由到与该 Pod 位于统一节点上的后端 Pod，若节点无可用端点，则视为该服务无可用实例（即使其他节点有端点），这样的流量会被 Drop。
 
 
 
 ## spec.externalTrafficPolicy
 
-**externalTrafficPolicy** 字段，用于控制**外部流量**如何路由到后端 Pod，仅对 `NodePort` 和 `LoadBalancer` 生效，不适用于 `ClusterIP`。可选值：
+**externalTrafficPolicy** 字段，用于控制**外部流量**如何路由到后端 Pod，仅对 **`NodePort`** 和 **`LoadBalancer`** 生效，不适用于 `ClusterIP`，可选值：
 
-- `Cluster`（默认）：访问 port 的流量会路由到集群中所有健康的端点（跨节点），适用于全局负载均衡。
-- `Local`：访问 port 的流量仅路由到当前节点上的本地端点。若节点无可用端点，则视为该服务无可用实例（即使其他节点有端点），这样的流量会被 Drop。
+- `Cluster`（默认）：当外部流量到达一个 Node 时，该节点会将其负载均衡到集群中任意节点上的所有后端 Pod。
+- `Local`：当外部流量到达一个节点时，该节点只会将流量转发到位于本节点上的后端 Pod，如果本节点没有后端 Pod，流量会被丢弃。（即使其他节点有端点），这样的流量会被 Drop。
 
 
 

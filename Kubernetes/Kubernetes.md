@@ -2,7 +2,7 @@
 
 # 架构
 
-![kubernetes-cluster-architecture](./Kubernetes.assets/kubernetes-cluster-architecture.svg)
+![kubernetes-cluster-architecture](./Kubernetes.assets/Kubernetes-architecture-diagram.png)
 
 ![components-of-kubernetes](./Kubernetes.assets/components-of-kubernetes.svg)
 
@@ -3284,6 +3284,7 @@ spec:
       port: 80
       targetPort: 80
       nodePort: 30080
+  internalTrafficPolicy: Cluster
 ```
 
 * **`apiVersion`**：指定 API 版本，Service 的版本通常为 `v1`。
@@ -3302,19 +3303,26 @@ spec:
 		- 定义匹配的 Pod 的标签。Service 将流量转发到符合这些标签的 Pod。
 		- 如果省略 `selector`，需要手动指定后端 Endpoints。
 
-		**`ports`**：
+		**`ports`**：定义 Service 的端口规则。
 
-		- 定义 Service 的端口规则。
 		- `port`：客户端访问 Service 时使用的端口。
 		- `targetPort`：转发到 Pod 的端口。
 		- `protocol`：通信协议，默认为 TCP。
+		
+		**`type`**：定义 Service 的类型：
+		
+		- **ClusterIP**（默认）：只能在集群内访问。
+		- **NodePort**：分配每个节点的静态端口。
+		- **LoadBalancer**：分配外部负载均衡器。
+		
+	* **`internalTrafficPolicy`**：决定集群内部流量在到达 Service 的 ClusterIP 后，如何被转发到后端 Pod。
+	
+	  * `Cluster`（默认）：当集群内部的某个 Pod 访问这个 Service 的 ClusterIP 时，kube-proxy 会将这个请求负载均衡到集群中任何节点上所有处于 Ready 状态的后端 Pod。
+	  * `Local`：当集群内部的某个 Pod 访问这个 Service 的 ClusterIP 时，kube-proxy 只会将请求路由到与发起请求的 Pod 位于同一个节点上的后端 Pod。
+	
+	* **`externalTrafficPolicy`**：仅对 `type: NodePort` 和 `type: LoadBalancer` 的 Service 有效。它控制从集群外部进入的流量如何被路由。
 
-		**`type`**：
-
-		- 定义 Service 的类型：
-			- **ClusterIP**（默认）：只能在集群内访问。
-			- **NodePort**：分配每个节点的静态端口。
-			- **LoadBalancer**：分配外部负载均衡器。
+`internalTrafficPolicy` 和 `externalTrafficPolicy` 详细字段解释可看 [Service](Service.md)
 
 > [!important]
 >
@@ -3454,6 +3462,16 @@ spec:
 ***
 
 
+
+### 路由策略
+
+#### internalTrafficPolicy
+
+
+
+
+
+***
 
 ### 命令操作
 
