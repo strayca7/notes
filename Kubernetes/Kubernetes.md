@@ -4777,11 +4777,19 @@ spec:
 
 **配置的热更新**是指在应用程序运行过程中，动态更新其配置文件或配置数据，而无需重启应用程序。这种方式可以避免服务中断，提高系统的可用性和灵活性。
 
-在 Kubernetes 中，配置热更新通常通过 **ConfigMap** 和 **Secret** 实现。可以直接用 `kubectl edit` 修改挂载的文件。
+在 Kubernetes 中，配置热更新通常通过 **ConfigMap** 和 **Secret** 实现。可以直接用 `kubectl edit` 修改挂载的文件。**只有当文件作为文件挂载时才会进行配置的热更新。**
 
 - 默认方式：会更新，更新周期 = 更新时间 + 缓存时间。
+
+**会热更新**：
+
+- 作为文件挂载：通常会使用 volumes 字段。
+
+**不会热更新**：
+
 - [subPath](#subpath)：不会更新。
-- 变量形式：如果 Pod 中的一个变量是从 ConfigMap 或 Secret 中得到的，同样也不会更新。
+- 命令行参数：如果 `command/args` 字段，将 ConfigMap 中的值作为启动参数传递给应用。命令行参数也是在进程启动时就确定了的，与环境变量一样，启动后无法更改。
+- 变量形式：使用 `env/envFrom`，将 ConfigMap 或 Secret 的键值对作为环境变量注入到容器中。进程的环境变量是在它启动时创建的，一旦进程启动，它的环境变量就是**不可变**的。Kubernetes 无法在不重启进程的情况下更改它的环境变量。
 
 
 
@@ -6102,14 +6110,21 @@ metadata:
   name: my-cronjob
 spec:
   schedule: "0 0 * * *"  			# cron 表达式，指定任务的执行时间 (分 时 日 月 星期)
-  startingDeadlineSeconds: 200 		# 错过调度时间后，最多延迟 200s，否则则跳过此次执行
-  concurrencyPolicy: Allow 			# 允许该 CronJob 创建的 Job 并发
+  timeZone: "Asia/Shanghai" 		# 可选：K8s 1.27+ 支持时区
+  startingDeadlineSeconds: 200 		# 可选：错过调度时间后，最多延迟 200s，否则则跳过此次执行
+  concurrencyPolicy: Allow 			# 可选：并发策略 (Allow | Forbid | Replace)
   successfulJobsHistoryLimit: 3 	# 保留 3 个成功完成的 Job，默认 3
   failedJobsHistoryLimit: 1 		# 保留 1 个失败的 Job，默认 1
   suspend: false 					# 取消调度挂起
   jobTemplate:
     spec:
+      parallelism: 1            # 可选：并行度
+      completions: 1            # 可选：完成数
+      backoffLimit: 6           # 可选：失败重试次数
       template:
+        metaData:
+       	  labels:
+       	    apps: cron
         spec:
           containers:
             - name: my-container
@@ -6243,7 +6258,7 @@ spec:
 
 
 
-## <span id="taint-and-toleration">污点和容忍</span>
+## <span id="taint-and-tolerant">Taint and Tolerant</span>
 
 **污点（Taint）** 和 **容忍度（Toleration）** 是调度机制中的关键概念。它们共同作用，确保 Pod 被调度到适合的节点上，避免在不适合的节点上运行。
 
@@ -6418,7 +6433,7 @@ tolerations:
 
 
 
-## <span id="affinity-and-anti-affinity">亲和性与反亲和性</span>
+## <span id="affinity-and-anti-affinity">Affinity</span>
 
 **亲和性（Affinity）**和**反亲和性（Anti-Affinity）**是用来控制 Pod 调度行为的机制。它们允许你定义 Pod 应该被调度到哪些节点上（亲和性），或者不应该被调度到哪些节点上（反亲和性）。这些机制可以帮助你优化资源利用率、提高容错性、满足业务需求等。
 
