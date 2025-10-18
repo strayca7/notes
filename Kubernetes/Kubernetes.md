@@ -2470,7 +2470,7 @@ metadata:
 spec:
   replicas: 3
   podManagementPolicy: ""
-  serviceName: "my-service"	# 使用哪个 service 来管理 dns
+  serviceName: "my-service"	# 使用哪个 service 来管理 dns，必须要手动指定
   selector:
     matchLabels:
       app: my-app
@@ -2519,7 +2519,7 @@ spec:
   	- **`podManagementPolicy`**：控制 Pod 的创建、删除和扩展顺序。该字段仅影响 Pod 的初始部署和扩缩容，而 `updateStrategy` 控制版本更新时的行为。
   	  - `OrderedReady`：默认值，严格按照 Pod 序号（如 `web-0`、`web-1`）依次创建或倒序删除。必须等待前一个 Pod 进入 `Running and Ready` 状态后，才会处理下一个 Pod。
   	  - `Parallel`：同时创建或删除所有 Pod，不依赖顺序或状态。
-  	- **`serviceName`**：指定与 StatefulSet 关联的 Headless Service 名称（`my-service`）。
+  	- **`serviceName`**：指定与 StatefulSet 关联的 Headless Service 名称（`my-service`），**必须要手动指定**。
   	  - Headless Service 用于为每个 Pod 提供唯一的网络标识（DNS 名称）。
   	- **`template`**：定义 Pod 的模板。
   	  - **`spec`**：Pod 的规格。
@@ -5515,6 +5515,10 @@ volumes:
   emptyDir:
     medium: Memory
 ```
+
+这个 `emptyDir` 提供一个读写速度极快的临时存储空间，`emptyDir` 卷所使用的内存会占用容器的 `resources.limits.memory`。
+
+容器实际内存 = emptyDir 占用内存 + 程序自身内存开销
 
 
 
