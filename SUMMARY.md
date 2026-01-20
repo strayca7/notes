@@ -15,3 +15,6 @@
   * [GPM](Go/GPM.md)
   * [Mutex](Go/Mutex.md)
   * [WaitGroup](Go/WaitGroup.md)
+
+- [Rust](Rust/README.md)
+    - [Ownership](Rust/Ownership)

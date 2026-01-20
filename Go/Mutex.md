@@ -534,6 +534,54 @@ func main() {
 
 ## 源码实现
 
+### 初始版本
+
+类似 futex
+
+1. 在用户空间用原子操作（CAS）尝试加锁；
+2. 如果锁空闲，直接成功；
+3. 如果锁被占用，调用内核的 `semacquire(*uint)` 系统调用，将当前线程挂起；
+4. 当锁释放时，另一个线程调用 `semrelease(*uint)` 唤醒它。
+
+```go
+func cas(val *int32, old, new int32) bool
+func semacquire(s *uint32)
+func semrelease(s *uint32)
+
+type Mutex struct {
+	key int32
+	sema uint32
+}
+
+func xadd(val *int32, delta int32) (new int32) {
+	for {
+		old := *val
+		if cas(val, old, old+delta) {	// spin
+			return old + delta
+		}
+	}
+	panic("unreached")
+}
+
+func (m *Mutex) Lock() {
+	if xadd(&m.key, 1) == 1 {
+		return
+	}
+	semacquire(&m.sema)
+}
+
+func (m *Mutex) Unlock() {
+	if xadd(&m.key, -1) == 0 {
+		return
+	}
+	semrelease(&m.sema)
+}
+```
+
+
+
+### 现代版本
+
 `internal/sync/mutex.go`
 
 Mutex 底层结构体
@@ -1061,5 +1109,6 @@ r := rw.readerCount.Add(-rwmutexMaxReaders) + rwmutexMaxReaders
 再加上 `rwmutexMaxReaders` 用于恢复 lock 瞬间 readerCount 的数量。即使后面有新的 reader 也不会影响到这个 `r`。
 
 之后如果 `r` 不为 0 说明还有读锁，并把这些 `reader` 加入到 `readerWait` 中，调用 `runtime_SemacquireRWMutex` 在 `writerSem` 上睡眠。
+
 
 

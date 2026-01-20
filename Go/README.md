@@ -1,5 +1,5 @@
 ---
-description: 本目录为 Go 语言相关内容
+description: This part is notes for learning Go.
 icon: golang
 ---
 
