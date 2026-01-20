@@ -1,15 +1,15 @@
-- **WaitGroup.Add**
-- **WaitGroup.Done**
-- **WaitGroup.Wait**
-- **WaitGroup.Go**
+# WaitGroup
 
-> `WaitGroup.Go(f func())` 为 `Go1.25`，新加方法，具体实现见下 [WaitGroup.Go](#waitgroup.go)
+* **WaitGroup.Add**
+* **WaitGroup.Done**
+* **WaitGroup.Wait**
+* **WaitGroup.Go**
 
+> `WaitGroup.Go(f func())` 为 `Go1.25`，新加方法，具体实现见下 [WaitGroup.Go](WaitGroup.md#waitgroup.go)
 
+## 源码解读
 
-# 源码解读
-
-## WaitGroup
+### WaitGroup
 
 ```go
 // A WaitGroup must not be copied after first use.
@@ -27,17 +27,13 @@ type WaitGroup struct {
 }
 ```
 
-<img src="./WaitGroup.assets/waitgroup-state.excalidraw.svg" alt="waitgroup-state.excalidraw" style="zoom: 50%;" />
+![waitgroup-state.excalidraw](../.gitbook/assets/waitgroup-state.excalidraw.svg)
 
-- **counter**：WaitGroup 维护的计数器，统计总共有多少未完成的任务。
-- **bubble^1^ flag**：判断是否已与某个 synctest bubble 关联。
-- **wait count**：当前有多少 goroutine 在执行 `WaitGroup.Wait()` 并已经登记为 waiter。
+* **counter**：WaitGroup 维护的计数器，统计总共有多少未完成的任务。
+* **bubble^1^ flag**：判断是否已与某个 synctest bubble 关联。
+* **wait count**：当前有多少 goroutine 在执行 `WaitGroup.Wait()` 并已经登记为 waiter。
 
-[^1]: "bubble"，Go1.25 引入的 `testing/synctest` 并发测试框架的一个隔离单元，参考 [testing/synctest](https://pkg.go.dev/testing/synctest)
-
-
-
-## <span id="waitgroup.go">WaitGroup.Go</span>
+### WaitGroup.Go
 
 ```go
 func (wg *WaitGroup) Add(delta int) {
@@ -71,4 +67,3 @@ func (wg *WaitGroup) Add(delta int) {
 	}
 }
 ```
-

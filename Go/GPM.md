@@ -24,7 +24,7 @@
 
 Go 程序由 Go Program 和 Runtime 组成，即用户程序和运行时。
 
-![scheuler](GPM.assets/scheuler.png)
+![scheuler](../.gitbook/assets/scheuler.png)
 
 Runtime 维护所有 goroutines，并通过 scheduler 来进行调度。Goroutines 和 threads 是独立的，但是 goroutines 要依赖 threads 才能执行。
 
@@ -40,7 +40,7 @@ Runtime 维护所有 goroutines，并通过 scheduler 来进行调度。Goroutin
 
 ### GPM 调度模型
 
-![go-GPM](GPM.assets/go-GPM.png)
+![go-GPM](../.gitbook/assets/go-GPM.png)
 
 Go 的调度器中有三个核心对象：
 
@@ -134,7 +134,7 @@ GPM 模型中特殊的角色 `m0`, `g0`, `gsignal`。
 
 g0 是 M 中负责调度其他 g 的协程，所以一个 M 中的协程调度其实就是在 g 和 g0 之间不断切换。
 
-![G-g0](GPM.assets/G-g0.png)
+![G-g0](../.gitbook/assets/G-g0.png)
 
 ## 调度策略
 
@@ -220,7 +220,7 @@ g0 是 M 中负责调度其他 g 的协程，所以一个 M 中的协程调度�
 
 **Work Stealing 机制** 核心思想是当 M 绑定的 P 本地队列中无可运行的 G 时，尝试从其他 M 绑定的 P 偷取 G，而不是销毁线程，来实现负载均衡。
 
-![working-stealing](GPM.assets/working-stealing.png)
+![working-stealing](../.gitbook/assets/working-stealing.png)
 
 当从本线程 M 从绑定 P 本地队列、全局 G 队列、Netpoller 都找不到可执行的 G，会从其它 P 里窃取 G 并放到当前 P上面
 
@@ -237,7 +237,7 @@ g0 是 M 中负责调度其他 g 的协程，所以一个 M 中的协程调度�
 
 当 M 系统调用（或阻塞）结束时，这个 G1 会尝试获取一个空闲的 P 执行，并放入到这个 P 的本地队列，如果获取不到 P，那么这个 G1 加入到全局 G1 里，这个 M 会加入到空闲线程列表中，重新可以进入调度循环。
 
-![hand-off](GPM.assets/hand-off.png)
+![hand-off](../.gitbook/assets/hand-off.png)
 
 对于 G1，它的调度优先级是动态的，取决于它返回时系统的繁忙程度，分两种情况：
 
