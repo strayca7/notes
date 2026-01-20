@@ -1,8 +1,8 @@
+# Ownership
+
 [The Rust Programming Language - 4. Ownership](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)
 
 
-
-# Ownership
 
 **Rust Ownership 三大规则**：
 
